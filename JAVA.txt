@@ -15,7 +15,7 @@ const TELEGRAM_ICON="https://ik.imagekit.io/dkdlgynlu/1280px-Telegram_2019_Logo.
 /* IMPORTANT:
    - Put your real Telegram username/link here later.
    - This uses Telegram share URL so it works without a username too. */
-const TELEGRAM_SHARE_URL = "https://t.me/share/url";
+const TELEGRAM_ORDER_URL = "https://t.me/Delta_gameshop";
 
 /* If you want category headers later, we can add them.
    Right now: Shop shows a clean grid of products. */
@@ -373,6 +373,15 @@ const homeBtn = document.getElementById("nav-home");
 const shopBtn = document.getElementById("nav-shop");
 
 let ACTIVE_VIEW = homeView;
+/* Remember where user opened Cart from (Shop/Plan) + their scroll position */
+let CART_ENTRY_VIEW = null;
+let CART_ENTRY_SCROLL_Y = 0;
+
+function restoreScrollY(y){
+  const yy = Math.max(0, Number(y) || 0);
+  requestAnimationFrame(() => window.scrollTo(0, yy));
+  requestAnimationFrame(() => window.scrollTo(0, yy));
+}
 
 function showView(which, { resetScroll=false } = {}){
   const all = [homeView, shopView, detailView, planView, cartView, checkoutView].filter(Boolean);
@@ -684,6 +693,9 @@ const checkoutTelegram = document.getElementById("checkout-telegram");
 /* cart map: key -> { pid, planId, qty } */
 const CART = new Map();
 
+/* pending selections on Plan page only (NOT committed yet) */
+const PENDING = new Map();
+
 /* current plan product */
 let currentPlanProduct = null;
 
@@ -691,17 +703,38 @@ function cartKey(pid, planId){
   return pid + "::" + planId;
 }
 
-function getQty(pid, planId){
+/* ===== CART (committed) qty helpers ===== */
+function getCartQty(pid, planId){
   const k = cartKey(pid, planId);
   return CART.get(k)?.qty || 0;
 }
 
-function setQty(pid, planId, qty){
+function setCartQty(pid, planId, qty){
   const k = cartKey(pid, planId);
   if (qty <= 0){
     CART.delete(k);
   } else {
     CART.set(k, { pid, planId, qty });
+  }
+}
+
+/* ===== PENDING (plan page only) qty helpers ===== */
+function getPendingQty(pid, planId){
+  const k = cartKey(pid, planId);
+  return PENDING.get(k) || 0;
+}
+
+function setPendingQty(pid, planId, qty){
+  const k = cartKey(pid, planId);
+  const next = Math.max(0, Number(qty) || 0);
+  if (next <= 0) PENDING.delete(k);
+  else PENDING.set(k, next);
+}
+
+/* Clear all pending rows for a product */
+function clearPendingForProduct(pid){
+  for (const k of Array.from(PENDING.keys())){
+    if (k.startsWith(pid + "::")) PENDING.delete(k);
   }
 }
 
@@ -729,8 +762,8 @@ function updateCartMini(){
 }
 
 function isShopFlowView(v){
-  // Cart bar visible only on these views (NOT on homeView, NOT on detailView)
-  return v === shopView || v === planView || v === cartView || v === checkoutView;
+  // Cart bar visible only while browsing/adding (NOT on Cart/Checkout pages)
+  return v === shopView || v === planView;
 }
 
 function updateCartBar(){
@@ -790,10 +823,18 @@ cartClearBtn && cartClearBtn.addEventListener("click", ()=>{
 
 /* Cart bar checkout -> go to Cart view (review first) */
 cartbarCheckoutBtn && cartbarCheckoutBtn.addEventListener("click", ()=>{
-  renderCart();
-  showView(cartView, { resetScroll:true });
-});
+  // ✅ Save where user came from + exact scroll position
+  if (ACTIVE_VIEW === shopView || ACTIVE_VIEW === planView){
+    CART_ENTRY_VIEW = ACTIVE_VIEW;
+    CART_ENTRY_SCROLL_Y = window.scrollY || 0;
+  } else {
+    CART_ENTRY_VIEW = null;
+    CART_ENTRY_SCROLL_Y = 0;
+  }
 
+  renderCart();
+  showView(cartView, { resetScroll:true }); // cart page opens at top (clean)
+});
 
 function openPlanForProduct(product){
   currentPlanProduct = product;
@@ -839,7 +880,7 @@ function renderPlanGroups(product){
 
       <div class="plan-rows">
         ${g.plans.map(pl => {
-          const qty = getQty(product.id, pl.id);
+          const qty = getPendingQty(product.id, pl.id);
           return `
             <div class="plan-row" data-plan-id="${escapeHTML(pl.id)}">
               <div class="plan-left">
@@ -869,10 +910,10 @@ function renderPlanGroups(product){
       if (!currentPlanProduct || !planId) return;
 
       const act = btn.getAttribute("data-act");
-      const current = getQty(currentPlanProduct.id, planId);
+      const current = getPendingQty(currentPlanProduct.id, planId);
 
       const next = act === "plus" ? current + 1 : current - 1;
-      setQty(currentPlanProduct.id, planId, next);
+      setPendingQty(currentPlanProduct.id, planId, next);
 
       const qtyEl = row.querySelector("[data-qty]");
       if (qtyEl) qtyEl.textContent = String(Math.max(0, next));
@@ -888,15 +929,53 @@ planBackBtn && planBackBtn.addEventListener("click", ()=>{
   setNavActive(shopBtn);
 });
 
-/* Go cart */
+/* Add to Cart (commit pending selections, reset plan to 0, stay on plan page) */
 goCartBtn && goCartBtn.addEventListener("click", ()=>{
-  renderCart();
-  showView(cartView, { resetScroll:true });
+  if (!currentPlanProduct) return;
+
+  // Commit pending selections for this product into CART
+  currentPlanProduct.plans.forEach(pl=>{
+    const addQty = getPendingQty(currentPlanProduct.id, pl.id);
+    if (addQty <= 0) return;
+
+    const existing = getCartQty(currentPlanProduct.id, pl.id);
+    setCartQty(currentPlanProduct.id, pl.id, existing + addQty);
+  });
+
+  // Reset pending selections for this product back to 0
+  clearPendingForProduct(currentPlanProduct.id);
+
+  // Re-render plan so all numbers show 0 again
+  renderPlanGroups(currentPlanProduct);
+
+  // Update cart UI (global bar + mini count)
+  updateCartMini();
+  updateCartBar();
 });
 
-/* Cart back -> Plan (if exists), else Shop */
+/* Cart back -> return to where Checkout was clicked (Shop/Plan) with scroll restore */
 cartBackBtn && cartBackBtn.addEventListener("click", ()=>{
+  // Priority: go back to the exact entry view (shop/plan) if known
+  if (CART_ENTRY_VIEW === shopView){
+    showView(shopView, { resetScroll:false });
+    setNavActive(shopBtn);
+    restoreScrollY(CART_ENTRY_SCROLL_Y);
+    return;
+  }
+
+  if (CART_ENTRY_VIEW === planView && currentPlanProduct){
+    // Make sure plan UI is correct when returning
+    renderPlanGroups(currentPlanProduct);
+    updateCartMini();
+    showView(planView, { resetScroll:false });
+    restoreScrollY(CART_ENTRY_SCROLL_Y);
+    return;
+  }
+
+  // Fallback behavior (if entry unknown)
   if (currentPlanProduct){
+    renderPlanGroups(currentPlanProduct);
+    updateCartMini();
     showView(planView, { resetScroll:true });
   } else {
     showView(shopView, { resetScroll:true });
@@ -954,9 +1033,9 @@ function renderCart(){
       if (!pid || !planId) return;
 
       const act = btn.getAttribute("data-act");
-      const cur = getQty(pid, planId);
+      const cur = getCartQty(pid, planId);
       const next = act === "plus" ? cur + 1 : cur - 1;
-      setQty(pid, planId, next);
+      setCartQty(pid, planId, next);
 
       renderCart();     // re-render safely
       updateCartMini(); // keep mini count accurate
@@ -996,14 +1075,16 @@ function buildTelegramMessage(){
 }
 
 function renderCheckout(){
+  // Show summary text on the checkout page
   if (checkoutSummaryEl){
     const msg = buildTelegramMessage();
     checkoutSummaryEl.textContent = msg;
   }
 
+  // Telegram deep link with prefilled order message
   if (checkoutTelegram){
     const msg = buildTelegramMessage();
-    const url = TELEGRAM_SHARE_URL + "?url=&text=" + encodeURIComponent(msg);
+    const url = TELEGRAM_ORDER_URL + "?text=" + encodeURIComponent(msg);
     checkoutTelegram.setAttribute("href", url);
   }
 }
@@ -1148,7 +1229,6 @@ function openDetailForProduct(product){
     if (e.key==="Enter" || e.key===" ") { e.preventDefault(); openLightbox([HOME_IMAGE, ...galleryImages], 0); }
   });
 }
-
 
 /* Back from detail -> home */
 detailBackBtn?.addEventListener("click", ()=>{
