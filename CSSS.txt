@@ -1163,12 +1163,10 @@ body.lb-open .bottom-nav{
   color: rgba(255,255,255,0.85);
 }
 
-
 @media (min-width: 900px){
   .shop-cat-title{
     font-size: 18px;            /* desktop */
     padding: 0 10px;            /* keep aligned */
   }
 }
-
 
