@@ -65,6 +65,10 @@ body{
   z-index:35;
 }
 
+#shop-view{
+  padding-bottom: calc(var(--bottom-height) + 120px);
+}
+
 #home-view{padding-top: calc(var(--toolbar-height) + 8px);}
 
 .toolbar-inner{
@@ -173,12 +177,13 @@ body{
 
 .banner-media{
   position:relative;
-  aspect-ratio:16/9;
+   /* ✅ let images keep their original ratio */
+  aspect-ratio: auto;
 }
 .banner-media img{
   width:100%;
-  height:100%;
-  object-fit:cover;
+  height:auto;          /* ✅ natural height */
+  object-fit:contain;   /* ✅ no cropping */
   display:block;
 }
 
@@ -273,7 +278,13 @@ body{
 /* =========================================================
    NEW PLAN VIEW
    ========================================================= */
-#plan-view{padding-top:12px;}
+#plan-view{
+  padding-top:12px;
+
+  /* ✅ allow content to scroll above the fixed cart bar */
+  padding-bottom: calc(var(--bottom-height) + 120px);
+}
+
 
 .plan-wrap{
   max-width: var(--page-max);
@@ -613,8 +624,9 @@ body{
 }
 .detail-hero img{
   width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
+  height:auto;          /* ✅ natural ratio */
+  aspect-ratio:auto;    /* ✅ no forced 16:9 */
+  object-fit:contain;   /* ✅ no cropping */
   display:block;
 }
 
@@ -646,8 +658,9 @@ body{
 }
 .gallery-item img{
   width:100%;
-  aspect-ratio:16/9;
-  object-fit:cover;
+  height:auto;          /* ✅ natural ratio */
+  aspect-ratio:auto;    /* ✅ no forced 16:9 */
+  object-fit:contain;   /* ✅ no cropping */
   display:block;
 }
 
@@ -884,19 +897,18 @@ body.lb-open .bottom-nav{
   z-index: 55;
 
   display: none; /* shown only when cart has items */
-  gap: 8px;
+  gap: 6px;
   align-items: center;
 
-  padding: 8px;
-  border-radius: 14px;
+  padding: 6px;
+  border-radius: 13px;
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.06);
 
-  /* keep glassy but smoother */
   backdrop-filter: blur(10px) saturate(120%);
   -webkit-backdrop-filter: blur(10px) saturate(120%);
 
-  box-shadow: 0 12px 22px rgba(0,0,0,0.55);
+  box-shadow: 0 10px 18px rgba(0,0,0,0.55);
 }
 
 /* Center + limit width on desktop (so it doesn't look massive) */
@@ -905,7 +917,7 @@ body.lb-open .bottom-nav{
     left: 50%;
     right: auto;
     transform: translateX(-50%);
-    width: min(980px, calc(100% - 40px));
+    width: min(860px, calc(100% - 40px));
   }
 }
 
@@ -914,10 +926,10 @@ body.lb-open .bottom-nav{
 }
 
 .cart-toggle{
-  width: 34px;
-  min-width: 34px;
-  height: 34px;
-  border-radius: 12px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  border-radius: 11px;
   border: 1px solid rgba(255,255,255,0.12);
   background: rgba(255,255,255,0.06);
   color: #fff;
@@ -1030,40 +1042,44 @@ body.lb-open .bottom-nav{
     align-items: center;
   }
 
-  /* Keep summary on ONE line always */
+  /* ✅ Mobile: 2-line summary like your FIRST image */
   .cart-summary-top{
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    gap: 4px;
+    gap: 3px;
     white-space: normal;
   }
+
+  /* ✅ Order: items on top, total below */
   .cart-count{ order: 0; }
-.cart-total{ order: 1; }
+  .cart-total{ order: 1; }
 
-.cart-count,
-.cart-total{
-  display: block;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.15;
-  font-size: clamp(12px, 3.4vw, 14px);
-}
-
-.cart-summary{
-  overflow: hidden;
-}
-
-  .cart-total,
-  .cart-count{
+  /* ✅ Each line stays single-line (no ugly wrapping), but summary is 2 lines */
+  .cart-count,
+  .cart-total{
+    display: block;
     white-space: nowrap;
-    line-height: 1.1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.12;
     font-size: clamp(11px, 3.2vw, 13px);
   }
 
-  /* Prevent actions/buttons from shrinking into weird shapes */
+  /* ✅ Prevent the “tiny divider line” from ever appearing */
+  .cart-count{
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
+
+  /* ✅ Ensure nothing visually spills past rounded edges */
+  .cart-summary{
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Buttons / actions stay stable */
   .cart-actions{
     flex-shrink: 0;
     gap: 7px;
@@ -1082,12 +1098,8 @@ body.lb-open .bottom-nav{
     min-width: 32px;
     height: 32px;
   }
-
-  /* Ensure summary area can shrink without wrapping */
-  .cart-summary{
-    min-width: 0;
-  }
 }
+
 @media (max-width: 360px){
   .cart-bar{
     padding: 6px;
@@ -1157,3 +1169,4 @@ body.lb-open .bottom-nav{
     padding: 0 10px;            /* keep aligned */
   }
 }
+
