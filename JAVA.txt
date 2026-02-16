@@ -1,24 +1,48 @@
 (function(){
 "use strict";
 
+/* =========================================================
+   CONFIG (SAFE DEFAULTS)
+   ========================================================= */
+
+/* Home / placeholder images you already use */
 const HOME_IMAGE="https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-10_13-04-43-459.jpg?updatedAt=1770885528535";
 const SHOP_IMAGE="https://ik.imagekit.io/dkdlgynlu/ICON%20_6176291_.png?updatedAt=1770475710430";
+
+/* Telegram icon (your chosen logo) */
 const TELEGRAM_ICON="https://ik.imagekit.io/dkdlgynlu/1280px-Telegram_2019_Logo.svg.png?updatedAt=1770982479969";
 
+/* IMPORTANT:
+   - Put your real Telegram username/link here later.
+   - This uses Telegram share URL so it works without a username too. */
+const TELEGRAM_SHARE_URL = "https://t.me/share/url";
+
+/* If you want category headers later, we can add them.
+   Right now: Shop shows a clean grid of products. */
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
 function escapeHTML(s){
   return String(s).replace(/[&<>"']/g, m => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[m]));
 }
 
-/* ✅ always start new view at top */
+function fmtKs(n){
+  // n is number like 28000 -> "28,000Ks"
+  const num = Number(n) || 0;
+  return num.toLocaleString("en-US") + "Ks";
+}
+
 function scrollToTopInstant(){
   window.scrollTo(0, 0);
-  // extra safety (some browsers/layouts need a second tick)
   requestAnimationFrame(() => window.scrollTo(0, 0));
 }
 
-/* HOME DATA (different values for testing) */
+/* =========================================================
+   HOME DATA (your existing test products)
+   ========================================================= */
 const homeProductsBase = [
   { id: 1, name: "Product 1", priceValue: 150000, skinValue: 20,  priceText: "Price : 150,000Ks", skinText: "Skin : 20"  },
   { id: 2, name: "Product 2", priceValue: 80000,  skinValue: 5,   priceText: "Price : 80,000Ks",  skinText: "Skin : 5"   },
@@ -28,40 +52,360 @@ const homeProductsBase = [
   { id: 6, name: "Product 6", priceValue: 300000, skinValue: 100, priceText: "Price : 300,000Ks", skinText: "Skin : 100" }
 ];
 
-/* SHOP DATA */
-const shopItemsBase = Array.from({length:6},(_,i)=>({ name:"Item "+(i+1) }));
+/* =========================================================
+   SHOP PRODUCTS + PLANS (FROM YOUR LIST)
+   IMPORTANT: Images are NOT assigned here to avoid guessing.
+   - Set each image in PRODUCT_IMAGES below.
+   ========================================================= */
+const PRODUCTS = [
+  {
+    id: "telegram_premium",
+    category: "TELEGRAM",
+    name: "Telegram Premium",
+    plans: [
+      { id: "login_1m",  label: "1Month Login", priceKs: 28000 },
+      { id: "3m",        label: "3Months",      priceKs: 58500 },
+      { id: "6m",        label: "6Months",      priceKs: 83500 },
+      { id: "12m",       label: "12Months",     priceKs: 145000 },
+    ]
+  },
+  {
+    id: "telegram_account",
+    category: "TELEGRAM",
+    name: "Telegram Account",
+    plans: [
+      { id: "account", label: "Account", priceKs: 2500 }
+    ]
+  },
 
-/* VIEWS */
-const homeView  = document.getElementById("home-view");
-const shopView  = document.getElementById("shop-view");
-const detailView= document.getElementById("detail-view");
+  {
+    id: "outline_vpn",
+    category: "OUTLINE VPN",
+    name: "Outline VPN",
+    plans: [
+      { id: "sgp_1m", label: "SGP 1Month", priceKs: 4300 },
+      { id: "sgp_3m", label: "SGP 3Months", priceKs: 7500 },
+      { id: "us_1m",  label: "US 1Month", priceKs: 4500 },
+      { id: "us_3m",  label: "US 3Months", priceKs: 8000 },
+      { id: "jp_1m",  label: "JP 1Month", priceKs: 4300 },
+      { id: "jp_3m",  label: "JP 3Months", priceKs: 7500 },
+    ]
+  },
+
+  {
+    id: "express_vpn",
+    category: "VPN",
+    name: "Express VPN",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 3000 }
+    ]
+  },
+  {
+    id: "jumpjump_vpn",
+    category: "VPN",
+    name: "Jump Jump VPN",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 12000 }
+    ]
+  },
+  {
+    id: "nord_vpn",
+    category: "VPN",
+    name: "Nord VPN",
+    plans: [
+      { id: "1y", label: "1Year", priceKs: 25000 }
+    ]
+  },
+  {
+    id: "surfshark_vpn",
+    category: "VPN",
+    name: "Surfshark VPN",
+    plans: [
+      { id: "2m", label: "2Months", priceKs: 10000 }
+    ]
+  },
+  {
+    id: "hma_vpn",
+    category: "VPN",
+    name: "HMA VPN",
+    plans: [
+      { id: "private_1m", label: "Private 1Month", priceKs: 9500 }
+    ]
+  },
+
+  {
+    id: "capcut_pro",
+    category: "EDITING APPS",
+    name: "CapCut Pro",
+    plans: [
+      { id: "share_1m",   label: "Share 1Month",   priceKs: 5000 },
+      { id: "private_1m", label: "Private 1Month", priceKs: 10000 }
+    ]
+  },
+  {
+    id: "alight_motion",
+    category: "EDITING APPS",
+    name: "Alight Motion",
+    plans: [
+      { id: "share_1y",   label: "Share 1Year",   priceKs: 5000 },
+      { id: "private_1y", label: "Private 1Year", priceKs: 7000 }
+    ]
+  },
+  {
+    id: "wink",
+    category: "EDITING APPS",
+    name: "Wink",
+    plans: [
+      { id: "share_1m", label: "Share 1Month", priceKs: 9500 }
+    ]
+  },
+  {
+    id: "meitu",
+    category: "EDITING APPS",
+    name: "Meitu",
+    plans: [
+      { id: "20day_share", label: "20Day Share", priceKs: 6000 }
+    ]
+  },
+  {
+    id: "picsart",
+    category: "EDITING APPS",
+    name: "Picsart",
+    plans: [
+      { id: "share_1m",   label: "Share 1Month",   priceKs: 5000 },
+      { id: "private_1m", label: "Private 1Month", priceKs: 7000 }
+    ]
+  },
+  {
+    id: "canva",
+    category: "EDITING APPS",
+    name: "Canva",
+    plans: [
+      { id: "share_1m",   label: "Share 1Month",   priceKs: 3000 },
+      { id: "private_1m", label: "Private 1Month", priceKs: 7000 },
+      { id: "edu_lifetime", label: "Edu Lifetime", priceKs: 8500 }
+    ]
+  },
+  {
+    id: "vsco",
+    category: "EDITING APPS",
+    name: "VSCO",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 8000 }
+    ]
+  },
+  {
+    id: "photoroom",
+    category: "EDITING APPS",
+    name: "PhotoRoom",
+    plans: [
+      { id: "1y", label: "1Year", priceKs: 8500 }
+    ]
+  },
+  {
+    id: "inshot",
+    category: "EDITING APPS",
+    name: "InShot",
+    plans: [
+      { id: "lifetime", label: "Lifetime", priceKs: 20000 }
+    ]
+  },
+
+  {
+    id: "gemini_veo3",
+    category: "AI TOOLS",
+    name: "Gemini Veo 3",
+    plans: [
+      { id: "invite_1m", label: "Invite 1Month", priceKs: 7500 },
+      { id: "1y",        label: "1Year",        priceKs: 30000 }
+    ]
+  },
+
+  {
+    id: "zoom_pro",
+    category: "WORK",
+    name: "Zoom Pro",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 9500 }
+    ]
+  },
+  {
+    id: "microsoft_365",
+    category: "WORK",
+    name: "Microsoft 365",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 7000 }
+    ]
+  },
+  {
+    id: "windows",
+    category: "WORK",
+    name: "Windows",
+    plans: [
+      { id: "win10_pro", label: "Windows 10 Pro", priceKs: 18000 },
+      { id: "win11_pro", label: "Windows 11 Pro", priceKs: 20000 }
+    ]
+  },
+
+  {
+    id: "spotify",
+    category: "STREAMING",
+    name: "Spotify",
+    plans: [
+      { id: "private_3m", label: "Private 3Months", priceKs: 28000 }
+    ]
+  },
+  {
+    id: "netflix",
+    category: "STREAMING",
+    name: "Netflix",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 18000 }
+    ]
+  },
+  {
+    id: "hbo_max",
+    category: "STREAMING",
+    name: "HBO Max",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 10000 }
+    ]
+  },
+  {
+    id: "youtube_premium",
+    category: "STREAMING",
+    name: "YouTube Premium",
+    plans: [
+      { id: "1m", label: "1Month", priceKs: 7000 },
+      { id: "3m", label: "3Months", priceKs: 18500 }
+    ]
+  },
+
+  {
+    id: "telegram_star",
+    category: "TELEGRAM STAR",
+    name: "Telegram Star",
+    plans: [
+      { id: "50",   label: "50⭐",   priceKs: 4350 },
+      { id: "100",  label: "100⭐",  priceKs: 8300 },
+      { id: "150",  label: "150⭐",  priceKs: 12500 },
+      { id: "200",  label: "200⭐",  priceKs: 18000 },
+      { id: "300",  label: "300⭐",  priceKs: 26800 },
+      { id: "400",  label: "400⭐",  priceKs: 36300 },
+      { id: "500",  label: "500⭐",  priceKs: 45500 },
+      { id: "1000", label: "1000⭐", priceKs: 77500 },
+    ]
+  },
+
+  {
+    id: "pubg_uc",
+    category: "PUBG UC",
+    name: "PUBG UC",
+    plans: [
+      { id: "60",    label: "60UC",    priceKs: 3850 },
+      { id: "325",   label: "325UC",   priceKs: 19650 },
+      { id: "660",   label: "660UC",   priceKs: 40230 },
+      { id: "1800",  label: "1800UC",  priceKs: 99540 },
+      { id: "3850",  label: "3850UC",  priceKs: 197610 },
+      { id: "8100",  label: "8100UC",  priceKs: 398020 },
+      { id: "16200", label: "16200UC", priceKs: 777670 },
+      { id: "24300", label: "24300UC", priceKs: 1228780 }
+    ]
+  }
+];
+
+/* =========================================================
+   PRODUCT IMAGES (NO GUESSING)
+   - If any image is wrong, edit ONLY here.
+   - Default fallback uses SHOP_IMAGE.
+   ========================================================= */
+const PRODUCT_IMAGES = {
+  "telegram_premium": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-A162-FC1.png?updatedAt=1764609029025",
+  "telegram_account": "https://ik.imagekit.io/dkdlgynlu/ICON%20_337E856_.png?updatedAt=1771146430750",
+
+  "outline_vpn": "https://ik.imagekit.io/dkdlgynlu/ICON%20_0FD8426_.png?updatedAt=1771146430743",
+
+  "express_vpn": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-7-D8-AC42-1.png?updatedAt=1764609026092",
+  "jumpjump_vpn": "https://ik.imagekit.io/dkdlgynlu/ICON%20_0279BE5_.png?updatedAt=1771146430842",
+  "nord_vpn": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-1-FBC099.png?updatedAt=1764609024638",
+  "surfshark_vpn": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-B51-A628.png?updatedAt=1764609025400",
+  "hma_vpn": "https://ik.imagekit.io/dkdlgynlu/Wattpad%20_A5A675F_.png?updatedAt=1766482936062",
+
+  "capcut_pro": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-C695-D25-1.png?updatedAt=1764609025105",
+  "alight_motion": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-9675-E38-1.png?updatedAt=1764609027402",
+  "wink": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-6373-C12.png?updatedAt=1764609023928",
+  "meitu": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-9460-A69.png?updatedAt=1764609027546",
+  "picsart": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-C2-C2-B1-B.png?updatedAt=1764609028848",
+  "canva": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-B7-E9-D62.png?updatedAt=1764609028389",
+  "vsco": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-A7-EE340.png?updatedAt=1764609025686",
+  "photoroom": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-9-A11032.png?updatedAt=1764609027047",
+  "inshot": "https://ik.imagekit.io/dkdlgynlu/Picsart-25-10-16-13-54-58-884.png?updatedAt=1764609028424",
+
+  "gemini_veo3": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-906-D5-F0.png?updatedAt=1764609026167",
+
+  "zoom_pro": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-5270010.png?updatedAt=1764609025167",
+  "microsoft_365": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-A872-E8-C.png?updatedAt=1764609026599",
+  "windows": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-041-CB23.png?updatedAt=1764609025343",
+
+  "spotify": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-D73314-D.png?updatedAt=1764609028797",
+  "netflix": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-0-F69823.png?updatedAt=1764609027001",
+  "hbo_max": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-E7812-FA.png?updatedAt=1764609028850",
+  "youtube_premium": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-2-DCD6-D5.png?updatedAt=1764609025093",
+
+  "telegram_star": "https://ik.imagekit.io/dkdlgynlu/Wattpad%20_AEF396E_.png?updatedAt=1767023159283",
+  "pubg_uc": "https://ik.imagekit.io/dkdlgynlu/ICON%20_8CC0267_.png?updatedAt=1771148832849"
+};
+  
+/* =========================================================
+   VIEWS
+   ========================================================= */
+const homeView     = document.getElementById("home-view");
+const shopView     = document.getElementById("shop-view");
+const detailView   = document.getElementById("detail-view");
+
+/* NEW views (must exist in your HTML) */
+const planView     = document.getElementById("plan-view");
+const cartView     = document.getElementById("cart-view");
+const checkoutView = document.getElementById("checkout-view");
 
 /* NAV */
 const homeBtn = document.getElementById("nav-home");
 const shopBtn = document.getElementById("nav-shop");
 
+let ACTIVE_VIEW = homeView;
+
 function showView(which, { resetScroll=false } = {}){
-  [homeView, shopView, detailView].forEach(v => v && v.classList.remove("active"));
-  which.classList.add("active");
+  const all = [homeView, shopView, detailView, planView, cartView, checkoutView].filter(Boolean);
+  all.forEach(v => v.classList.remove("active"));
+
+  if (which) {
+    which.classList.add("active");
+    ACTIVE_VIEW = which;
+  }
+
   if (resetScroll) scrollToTopInstant();
+  updateCartBar();
 }
 
 function setNavActive(btn){
   [homeBtn, shopBtn].forEach(b => b && b.classList.remove("active"));
-  btn.classList.add("active");
+  btn && btn.classList.add("active");
 }
 
-homeBtn.onclick=()=>{
+/* bottom nav behavior */
+homeBtn && (homeBtn.onclick = () => {
   showView(homeView, { resetScroll:true });
   setNavActive(homeBtn);
-};
+});
 
-shopBtn.onclick=()=>{
+shopBtn && (shopBtn.onclick = () => {
   showView(shopView, { resetScroll:true });
   setNavActive(shopBtn);
-};
+});
 
-/* ---------- CUSTOM DROPDOWNS ---------- */
+/* =========================================================
+   DROPDOWNS (your existing code)
+   ========================================================= */
 function closeAllDropdowns(){
   document.querySelectorAll(".dropdown.is-open").forEach(dd=>{
     dd.classList.remove("is-open");
@@ -151,58 +495,531 @@ document.addEventListener("keydown", (e)=>{
   if (e.key === "Escape") closeAllDropdowns();
 });
 
-/* ---------- HOME SORT + RENDER ---------- */
+/* =========================================================
+   HOME RENDER
+   ========================================================= */
+const homeBanners = document.getElementById("home-banners");
+
 function getSortModes(){
   const ddPrice = document.getElementById("dd-price");
   const ddSkin  = document.getElementById("dd-skin");
   return {
-    priceMode: ddPrice ? (ddPrice.dataset.value || "none") : "none",
-    skinMode:  ddSkin  ? (ddSkin.dataset.value  || "none") : "none"
+    price: (ddPrice?.dataset.value) || "none",
+    skin:  (ddSkin?.dataset.value)  || "none",
   };
 }
 
-function applySort(list){
-  const arr=[...list];
-  const { priceMode, skinMode } = getSortModes();
+function sortHomeProducts(list){
+  const { price, skin } = getSortModes();
+  const arr = list.slice();
 
-  const priceEnabled = priceMode !== "none";
-  const skinEnabled  = skinMode !== "none";
-  if (!priceEnabled && !skinEnabled) return arr;
-
-  arr.sort((a,b)=>{
-    let p=0,s=0;
-    if(priceEnabled){
-      p = priceMode==="asc" ? (a.priceValue-b.priceValue) : (b.priceValue-a.priceValue);
-    }
-    if(skinEnabled){
-      s = skinMode==="asc" ? (a.skinValue-b.skinValue) : (b.skinValue-a.skinValue);
-    }
-    return p || s || (a.id-b.id);
-  });
-
+  // Skin priority: if skin sort set, price ignored
+  if (skin !== "none"){
+    arr.sort((a,b)=> skin === "asc" ? (a.skinValue - b.skinValue) : (b.skinValue - a.skinValue));
+    return arr;
+  }
+  if (price !== "none"){
+    arr.sort((a,b)=> price === "asc" ? (a.priceValue - b.priceValue) : (b.priceValue - a.priceValue));
+  }
   return arr;
 }
 
-/* ---------- DETAIL VIEW ---------- */
-const homeWrap      = document.getElementById("home-banners");
-const detailBack    = document.getElementById("detail-back");
+function renderHome(){
+  if (!homeBanners) return;
+
+  const items = sortHomeProducts(homeProductsBase);
+
+  homeBanners.innerHTML = items.map(p => `
+    <div class="banner-card" data-home-id="${p.id}">
+      <div class="banner-media">
+        <img src="${escapeHTML(HOME_IMAGE)}" alt="${escapeHTML(p.name)}">
+        <div class="banner-overlay">
+          <div class="overlay-text">${escapeHTML(p.priceText)}</div>
+          <div class="overlay-text">${escapeHTML(p.skinText)}</div>
+        </div>
+      </div>
+    </div>
+  `).join("");
+
+  // click -> detail view (your existing flow)
+  homeBanners.querySelectorAll(".banner-card").forEach(card=>{
+    card.addEventListener("click", ()=>{
+      const id = Number(card.getAttribute("data-home-id"));
+      const product = homeProductsBase.find(x => x.id === id);
+      if (!product) return;
+      openDetailForProduct(product);
+      showView(detailView, { resetScroll:true });
+    });
+  });
+}
+
+renderHome();
+
+/* =========================================================
+   SHOP GRID RENDER (NEW)
+   ========================================================= */
+const shopGrid = document.getElementById("shop-grid");
+
+function renderShop(){
+  if (!shopGrid) return;
+
+  // Map your category rules
+  function normalizedCategory(p){
+    // Telegram group
+    if (p.id === "telegram_premium" || p.id === "telegram_account" || p.id === "telegram_star") {
+      return "Telegram";
+    }
+    // VPN group (Outline VPN becomes VPN too)
+    if (
+      p.id === "outline_vpn" ||
+      p.id === "express_vpn" ||
+      p.id === "jumpjump_vpn" ||
+      p.id === "nord_vpn" ||
+      p.id === "surfshark_vpn" ||
+      p.id === "hma_vpn"
+    ){
+      return "VPN";
+    }
+    // Game Items group
+    if (p.id === "pubg_uc") return "Game Items";
+
+    // Keep the rest by their existing category names
+    if (p.category === "EDITING APPS") return "Editing Apps";
+    if (p.category === "AI TOOLS") return "AI Tools";
+    if (p.category === "WORK") return "Work";
+    if (p.category === "STREAMING") return "Streaming";
+
+    // fallback
+    return p.category || "Other";
+  }
+
+  // Fixed order (your confirmed order)
+  const ORDER = ["Telegram", "VPN", "Editing Apps", "AI Tools", "Work", "Streaming", "Game Items"];
+
+  // Group products
+  const groups = new Map();
+  PRODUCTS.forEach(p=>{
+    const cat = normalizedCategory(p);
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat).push(p);
+  });
+
+  // Sort products inside each category by name (clean + predictable)
+  for (const [cat, arr] of groups.entries()){
+    arr.sort((a,b)=> a.name.localeCompare(b.name));
+  }
+
+  // Build HTML sections
+  const sectionsHTML = ORDER
+    .filter(cat => groups.has(cat))
+    .map(cat=>{
+      const cards = groups.get(cat).map(p => `
+        <div class="card" role="button" tabindex="0"
+             data-pid="${escapeHTML(p.id)}"
+             aria-label="${escapeHTML(p.name)}">
+          <img src="${escapeHTML(PRODUCT_IMAGES[p.id] || SHOP_IMAGE)}" alt="${escapeHTML(p.name)}">
+          <p>${escapeHTML(p.name)}</p>
+        </div>
+      `).join("");
+
+      return `
+        <section class="shop-section" data-cat="${escapeHTML(cat)}">
+          <h2 class="shop-cat-title">${escapeHTML(cat)}</h2>
+          <div class="grid shop-grid">
+            ${cards}
+          </div>
+        </section>
+      `;
+    }).join("");
+
+  shopGrid.innerHTML = sectionsHTML;
+
+  // Click/keyboard open plan page (delegated, safe for dynamic sections)
+  shopGrid.querySelectorAll(".card").forEach(card=>{
+    const open = ()=>{
+      const pid = card.getAttribute("data-pid");
+      const product = PRODUCTS.find(x => x.id === pid);
+      if (!product) return;
+      openPlanForProduct(product);
+      showView(planView, { resetScroll:true });
+    };
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", (e)=>{
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+    });
+  });
+}
+
+renderShop();
+
+/* =========================================================
+   PLAN VIEW + CART SYSTEM (NEW)
+   ========================================================= */
+const planBackBtn      = document.getElementById("plan-back");
+const planTitleEl      = document.getElementById("plan-product-title");
+const planImgEl        = document.getElementById("plan-product-img");
+const planGroupsEl     = document.getElementById("plan-groups");
+
+const cartMiniCountEl  = document.getElementById("cart-mini-count");
+const goCartBtn        = document.getElementById("go-cart-btn");
+
+const cartBackBtn      = document.getElementById("cart-back");
+const cartItemsEl      = document.getElementById("cart-items");
+const cartTotalEl      = document.getElementById("cart-total");
+const cartCheckoutBtn  = document.getElementById("cart-checkout");
+
+/* Global cart bar (already in HTML) */
+const cartBarEl          = document.getElementById("cart-bar");
+const cartToggleBtn      = document.getElementById("cart-toggle");
+const cartClearBtn       = document.getElementById("cart-clear");
+const cartTotalTextEl    = document.getElementById("cart-total-text");
+const cartCountTextEl    = document.getElementById("cart-count-text");
+const cartMiniListEl     = document.getElementById("cart-mini-list");
+const cartbarCheckoutBtn = document.getElementById("cartbar-checkout");
+
+const checkoutBackBtn  = document.getElementById("checkout-back");
+const checkoutSummaryEl= document.getElementById("checkout-summary");
+const checkoutTelegram = document.getElementById("checkout-telegram");
+
+/* cart map: key -> { pid, planId, qty } */
+const CART = new Map();
+
+/* current plan product */
+let currentPlanProduct = null;
+
+function cartKey(pid, planId){
+  return pid + "::" + planId;
+}
+
+function getQty(pid, planId){
+  const k = cartKey(pid, planId);
+  return CART.get(k)?.qty || 0;
+}
+
+function setQty(pid, planId, qty){
+  const k = cartKey(pid, planId);
+  if (qty <= 0){
+    CART.delete(k);
+  } else {
+    CART.set(k, { pid, planId, qty });
+  }
+}
+
+function cartItemCount(){
+  let total = 0;
+  for (const it of CART.values()) total += it.qty;
+  return total;
+}
+
+function cartTotalKs(){
+  let sum = 0;
+  for (const it of CART.values()){
+    const p = PRODUCTS.find(x => x.id === it.pid);
+    const plan = p?.plans.find(pl => pl.id === it.planId);
+    if (!plan) continue;
+    sum += (plan.priceKs * it.qty);
+  }
+  return sum;
+}
+
+function updateCartMini(){
+  if (!cartMiniCountEl) return;
+  const count = cartItemCount();
+  cartMiniCountEl.textContent = count + (count === 1 ? " item" : " items");
+}
+
+function isShopFlowView(v){
+  // Cart bar visible only on these views (NOT on homeView, NOT on detailView)
+  return v === shopView || v === planView || v === cartView || v === checkoutView;
+}
+
+function updateCartBar(){
+  if (!cartBarEl) return;
+
+  const count = cartItemCount();
+  const total = cartTotalKs();
+
+  const shouldShow = count > 0 && isShopFlowView(ACTIVE_VIEW);
+
+  cartBarEl.style.display = shouldShow ? "flex" : "none";
+  cartBarEl.setAttribute("aria-hidden", shouldShow ? "false" : "true");
+
+  if (!shouldShow) return;
+
+  if (cartTotalTextEl) cartTotalTextEl.textContent = `Total: ${fmtKs(total)}`;
+  if (cartCountTextEl) cartCountTextEl.textContent = `${count} item(s)`;
+
+  // Mini list (safe, small)
+  if (cartMiniListEl){
+    const items = Array.from(CART.values()).slice(0, 4);
+    cartMiniListEl.innerHTML = items.map(it => {
+      const p = PRODUCTS.find(x => x.id === it.pid);
+      const plan = p?.plans.find(pl => pl.id === it.planId);
+
+      const name = p?.name || it.pid;
+      const planLabel = plan?.label || it.planId;
+      const lineTotal = (plan?.priceKs || 0) * it.qty;
+
+      return `
+        <div class="cart-mini-item">
+          <div class="cart-mini-left">
+            <div class="cart-mini-title">${escapeHTML(name)}</div>
+            <div class="cart-mini-sub">${escapeHTML(planLabel)} • Qty: ${it.qty}</div>
+          </div>
+          <div class="cart-mini-price">${escapeHTML(fmtKs(lineTotal))}</div>
+        </div>
+      `;
+    }).join("");
+  }
+}
+
+/* Cart bar toggle */
+cartToggleBtn && cartToggleBtn.addEventListener("click", ()=>{
+  cartBarEl && cartBarEl.classList.toggle("is-open");
+});
+
+/* Cart bar clear */
+cartClearBtn && cartClearBtn.addEventListener("click", ()=>{
+  CART.clear();
+  updateCartMini();
+  updateCartBar();
+
+  if (ACTIVE_VIEW === cartView) renderCart();
+  if (ACTIVE_VIEW === checkoutView) renderCheckout();
+});
+
+/* Cart bar checkout -> go to Cart view (review first) */
+cartbarCheckoutBtn && cartbarCheckoutBtn.addEventListener("click", ()=>{
+  renderCart();
+  showView(cartView, { resetScroll:true });
+});
+
+
+function openPlanForProduct(product){
+  currentPlanProduct = product;
+
+  if (planTitleEl) planTitleEl.textContent = product.name;
+  if (planImgEl) planImgEl.src = PRODUCT_IMAGES[product.id] || SHOP_IMAGE;
+
+  renderPlanGroups(product);
+  updateCartMini();
+}
+
+function groupPlans(product){
+  // Group by first word: Share/Private/etc if present, otherwise put under "Plans"
+  // Example: "Share 1Month" -> group "Share"
+  const groups = new Map();
+
+  product.plans.forEach(pl=>{
+    const parts = pl.label.split(" ");
+    const first = (parts[0] || "").trim();
+    const isGroupWord = ["Share","Private","Invite","Account","SGP","US","JP"].includes(first);
+
+    const groupName = isGroupWord ? first : "Plans";
+    const itemLabel = isGroupWord ? pl.label.slice(first.length).trim() : pl.label;
+
+    if (!groups.has(groupName)) groups.set(groupName, []);
+    groups.get(groupName).push({ ...pl, displayLabel: itemLabel || pl.label });
+  });
+
+  return Array.from(groups.entries()).map(([name, plans])=>({ name, plans }));
+}
+
+function renderPlanGroups(product){
+  if (!planGroupsEl) return;
+
+  const groups = groupPlans(product);
+
+  planGroupsEl.innerHTML = groups.map(g => `
+    <div class="plan-group">
+      <div class="plan-group-head">
+        <div class="plan-group-title">${escapeHTML(g.name)}</div>
+        <div class="plan-group-note">Tap + to add</div>
+      </div>
+
+      <div class="plan-rows">
+        ${g.plans.map(pl => {
+          const qty = getQty(product.id, pl.id);
+          return `
+            <div class="plan-row" data-plan-id="${escapeHTML(pl.id)}">
+              <div class="plan-left">
+                <div class="plan-name">${escapeHTML(pl.displayLabel)}</div>
+                <div class="plan-price">${escapeHTML(fmtKs(pl.priceKs))}</div>
+              </div>
+
+              <div class="qty-controls">
+                <button class="qty-btn" type="button" data-act="minus" aria-label="Remove 1">−</button>
+                <div class="qty-num" data-qty>${qty}</div>
+                <button class="qty-btn" type="button" data-act="plus" aria-label="Add 1">+</button>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  // Wire +/- (event delegation)
+  planGroupsEl.querySelectorAll(".plan-row").forEach(row=>{
+    row.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button.qty-btn");
+      if (!btn) return;
+
+      const planId = row.getAttribute("data-plan-id");
+      if (!currentPlanProduct || !planId) return;
+
+      const act = btn.getAttribute("data-act");
+      const current = getQty(currentPlanProduct.id, planId);
+
+      const next = act === "plus" ? current + 1 : current - 1;
+      setQty(currentPlanProduct.id, planId, next);
+
+      const qtyEl = row.querySelector("[data-qty]");
+      if (qtyEl) qtyEl.textContent = String(Math.max(0, next));
+
+      updateCartMini();
+    });
+  });
+}
+
+/* Plan back -> Shop */
+planBackBtn && planBackBtn.addEventListener("click", ()=>{
+  showView(shopView, { resetScroll:true });
+  setNavActive(shopBtn);
+});
+
+/* Go cart */
+goCartBtn && goCartBtn.addEventListener("click", ()=>{
+  renderCart();
+  showView(cartView, { resetScroll:true });
+});
+
+/* Cart back -> Plan (if exists), else Shop */
+cartBackBtn && cartBackBtn.addEventListener("click", ()=>{
+  if (currentPlanProduct){
+    showView(planView, { resetScroll:true });
+  } else {
+    showView(shopView, { resetScroll:true });
+    setNavActive(shopBtn);
+  }
+});
+
+/* Render cart page */
+function renderCart(){
+  if (!cartItemsEl || !cartTotalEl) return;
+
+  const items = Array.from(CART.values());
+
+  if (!items.length){
+    cartItemsEl.innerHTML = `<div class="cart-item"><div class="cart-item-left"><div class="cart-item-name">Cart is empty</div><div class="cart-item-meta">Add plans using +</div></div></div>`;
+    cartTotalEl.textContent = "Ks 0";
+    return;
+  }
+
+  cartItemsEl.innerHTML = items.map(it=>{
+    const p = PRODUCTS.find(x => x.id === it.pid);
+    const plan = p?.plans.find(pl => pl.id === it.planId);
+    const priceEach = plan ? plan.priceKs : 0;
+    const lineTotal = priceEach * it.qty;
+
+    return `
+      <div class="cart-item" data-k="${escapeHTML(cartKey(it.pid, it.planId))}">
+        <div class="cart-item-left">
+          <div class="cart-item-name">${escapeHTML(p?.name || it.pid)}</div>
+          <div class="cart-item-meta">${escapeHTML(plan?.label || it.planId)} • Qty: ${it.qty}</div>
+          <div class="cart-item-price">${escapeHTML(fmtKs(lineTotal))}</div>
+        </div>
+
+        <div class="cart-item-right">
+          <button class="qty-btn" type="button" data-act="minus" aria-label="Remove 1">−</button>
+          <div class="qty-num">${it.qty}</div>
+          <button class="qty-btn" type="button" data-act="plus" aria-label="Add 1">+</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  cartTotalEl.textContent = "Ks " + cartTotalKs().toLocaleString("en-US");
+
+  // Wire +/- in cart
+  cartItemsEl.querySelectorAll(".cart-item").forEach(row=>{
+    row.addEventListener("click", (e)=>{
+      const btn = e.target.closest("button.qty-btn");
+      if (!btn) return;
+
+      const key = row.getAttribute("data-k");
+      if (!key) return;
+
+      const [pid, planId] = key.split("::");
+      if (!pid || !planId) return;
+
+      const act = btn.getAttribute("data-act");
+      const cur = getQty(pid, planId);
+      const next = act === "plus" ? cur + 1 : cur - 1;
+      setQty(pid, planId, next);
+
+      renderCart();     // re-render safely
+      updateCartMini(); // keep mini count accurate
+      updateCartBar();  // keep global cart bar accurate
+    });
+  });
+}
+
+/* Checkout click -> Checkout view */
+cartCheckoutBtn && cartCheckoutBtn.addEventListener("click", ()=>{
+  renderCheckout();
+  showView(checkoutView, { resetScroll:true });
+});
+
+/* Checkout back -> Cart */
+checkoutBackBtn && checkoutBackBtn.addEventListener("click", ()=>{
+  renderCart();
+  showView(cartView, { resetScroll:true });
+});
+
+/* Build Telegram message + show summary */
+function buildTelegramMessage(){
+  const items = Array.from(CART.values());
+  if (!items.length) return "Order:\n(Empty)";
+
+  const lines = ["Order:"];
+  items.forEach(it=>{
+    const p = PRODUCTS.find(x => x.id === it.pid);
+    const plan = p?.plans.find(pl => pl.id === it.planId);
+    const name = p?.name || it.pid;
+    const planLabel = plan?.label || it.planId;
+    lines.push(`${name} — ${planLabel} x${it.qty}`);
+  });
+  lines.push("");
+  lines.push(`Total: ${fmtKs(cartTotalKs())}`);
+  return lines.join("\n");
+}
+
+function renderCheckout(){
+  if (checkoutSummaryEl){
+    const msg = buildTelegramMessage();
+    checkoutSummaryEl.textContent = msg;
+  }
+
+  if (checkoutTelegram){
+    const msg = buildTelegramMessage();
+    const url = TELEGRAM_SHARE_URL + "?url=&text=" + encodeURIComponent(msg);
+    checkoutTelegram.setAttribute("href", url);
+  }
+}
+
+/* =========================================================
+   DETAIL VIEW (your existing system)
+   ========================================================= */
+const detailBackBtn = document.getElementById("detail-back");
 const detailHero    = document.getElementById("detail-hero");
 const detailHeroImg = document.getElementById("detail-hero-img");
 const detailGallery = document.getElementById("detail-gallery");
 const detailPrice   = document.getElementById("detail-price");
 const detailStatus  = document.getElementById("detail-status");
-
-/* Telegram button */
 const telegramOrder = document.getElementById("telegram-order");
-if (telegramOrder) {
-  telegramOrder.querySelector("img")?.setAttribute("src", TELEGRAM_ICON);
-  telegramOrder.addEventListener("click", (e)=>{
-    e.preventDefault();
-    alert("Set your Telegram order link in script.js for #telegram-order.");
-  });
-}
 
-/* ---------- LIGHTBOX (gallery preview with arrows + thumbs) ---------- */
+/* Lightbox elements */
 const lightbox         = document.getElementById("lightbox");
 const lightboxImg      = document.getElementById("lightbox-img");
 const lightboxBackdrop = document.getElementById("lightbox-backdrop");
@@ -235,7 +1052,7 @@ function renderThumbs(){
 
 function updateLightbox(){
   if (!lbImages.length) return;
-  lightboxImg.src = lbImages[lbIndex];
+  if (lightboxImg) lightboxImg.src = lbImages[lbIndex];
   renderThumbs();
 
   const active = lightboxThumbs?.querySelector(".lb-thumb.is-active");
@@ -249,15 +1066,15 @@ function openLightbox(images, startIndex){
   lbIndex = Math.max(0, Math.min(lbImages.length - 1, Number(startIndex) || 0));
   if (!lbImages.length) return;
 
-  lightbox.classList.add("is-open");
-  lightbox.setAttribute("aria-hidden","false");
+  lightbox?.classList.add("is-open");
+  document.body.classList.add("lb-open"); // uses your CSS to hide bottom nav
   updateLightbox();
 }
 
 function closeLightbox(){
-  lightbox.classList.remove("is-open");
-  lightbox.setAttribute("aria-hidden","true");
-  lightboxImg.src = "";
+  lightbox?.classList.remove("is-open");
+  document.body.classList.remove("lb-open");
+  if (lightboxImg) lightboxImg.src = "";
   lbImages = [];
   lbIndex = 0;
   if (lightboxThumbs) lightboxThumbs.innerHTML = "";
@@ -281,103 +1098,61 @@ lightboxPrev?.addEventListener("click", prevImage);
 lightboxNext?.addEventListener("click", nextImage);
 
 document.addEventListener("keydown", (e)=>{
-  if (!lightbox.classList.contains("is-open")) return;
+  if (!lightbox?.classList.contains("is-open")) return;
   if (e.key === "Escape") closeLightbox();
   if (e.key === "ArrowLeft") prevImage();
   if (e.key === "ArrowRight") nextImage();
 });
 
-/* Populate detail view for clicked product */
+/* Populate detail view for clicked home product */
 function openDetailForProduct(product){
-  detailHeroImg.src = HOME_IMAGE;
-  detailHeroImg.alt = product.name;
+  if (detailHeroImg) detailHeroImg.src = HOME_IMAGE;
 
-  detailPrice.textContent = product.priceText.replace("Price : ", "MMK ").replace("Ks", "").trim();
-  detailStatus.textContent = "Available"; // static
+  // gallery placeholders (6)
+  const galleryImages = Array.from({length:6},()=>HOME_IMAGE);
 
-  // 6 gallery images
-  const gallerySources = [HOME_IMAGE, HOME_IMAGE, HOME_IMAGE, HOME_IMAGE, HOME_IMAGE, HOME_IMAGE];
+  if (detailGallery){
+    detailGallery.innerHTML = galleryImages.map((src,i)=>`
+      <div class="gallery-item" role="button" tabindex="0" data-i="${i}" aria-label="Preview image ${i+1}">
+        <img src="${escapeHTML(src)}" alt="Gallery ${i+1}">
+      </div>
+    `).join("");
 
-  detailGallery.innerHTML = gallerySources.map((src, idx) => `
-    <div class="gallery-item" data-idx="${idx+1}" role="button" tabindex="0" aria-label="Open gallery image ${idx+1}">
-      <img src="${escapeHTML(src)}" alt="Gallery ${idx+1}">
-    </div>
-  `).join("");
-
-  // Preview list: main + 6 gallery = 7
-  const previewImages = [HOME_IMAGE, ...gallerySources];
-
-  const openHero = () => openLightbox(previewImages, 0);
-  detailHero.onclick = openHero;
-
-  detailHero.onkeydown = (e)=>{
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      openHero();
-    }
-  };
-
-  detailGallery.querySelectorAll(".gallery-item").forEach(item=>{
-    const idx = Number(item.getAttribute("data-idx")) || 1;
-    const openAt = () => openLightbox(previewImages, idx);
-
-    item.addEventListener("click", openAt);
-    item.addEventListener("keydown", (e)=>{
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openAt();
-      }
+    detailGallery.querySelectorAll(".gallery-item").forEach(item=>{
+      const open = ()=>{
+        const i = Number(item.getAttribute("data-i"));
+        openLightbox(galleryImages, i);
+      };
+      item.addEventListener("click", open);
+      item.addEventListener("keydown",(e)=>{
+        if (e.key==="Enter" || e.key===" ") { e.preventDefault(); open(); }
+      });
     });
+  }
+
+  // Right info
+  if (detailPrice) detailPrice.textContent = (product.priceText || "MMK 0");
+  if (detailStatus) detailStatus.textContent = "Available";
+
+  // Telegram order button in detail (kept as your placeholder behavior)
+  telegramOrder?.addEventListener("click", (e)=>{
+    e.preventDefault();
+    alert("Set your Telegram order link in script.js for #telegram-order.");
   });
 
-  // ✅ IMPORTANT: reset scroll when opening detail
-  showView(detailView, { resetScroll:true });
-  setNavActive(homeBtn);
+  // Hero preview
+  detailHero?.addEventListener("click", ()=>{
+    openLightbox([HOME_IMAGE, ...galleryImages], 0);
+  });
+  detailHero?.addEventListener("keydown", (e)=>{
+    if (e.key==="Enter" || e.key===" ") { e.preventDefault(); openLightbox([HOME_IMAGE, ...galleryImages], 0); }
+  });
 }
 
-/* Back button */
-detailBack?.addEventListener("click", ()=>{
+/* Back from detail -> home */
+detailBackBtn?.addEventListener("click", ()=>{
   showView(homeView, { resetScroll:true });
   setNavActive(homeBtn);
 });
-
-/* Render home */
-function renderHome(){
-  const data = applySort(homeProductsBase);
-
-  homeWrap.innerHTML = data.map(p=>`
-    <div class="banner-card" data-id="${p.id}">
-      <div class="banner-media">
-        <img src="${HOME_IMAGE}" alt="${escapeHTML(p.name)}">
-        <div class="banner-overlay">
-          <div class="overlay-text">${escapeHTML(p.priceText)}</div>
-          <div class="overlay-text">${escapeHTML(p.skinText)}</div>
-        </div>
-      </div>
-    </div>
-  `).join("");
-
-  homeWrap.querySelectorAll(".banner-card").forEach(card=>{
-    card.addEventListener("click", ()=>{
-      const id = Number(card.getAttribute("data-id"));
-      const product = homeProductsBase.find(p => p.id === id);
-      if (!product) return;
-      openDetailForProduct(product);
-    });
-  });
-}
-
-renderHome();
-
-/* Render shop */
-const shopGrid = document.getElementById("shop-grid");
-if (shopGrid){
-  shopGrid.innerHTML = shopItemsBase.map(i=>`
-    <div class="card">
-      <img src="${SHOP_IMAGE}" alt="${escapeHTML(i.name)}">
-      <p>${escapeHTML(i.name)}</p>
-    </div>
-  `).join("");
-}
 
 })();
