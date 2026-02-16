@@ -21,35 +21,32 @@
 <!-- HOME -->
 <main id="home-view" class="view active">
 
-  <!-- HOME SORT BAR (custom dropdowns) -->
   <section class="home-toolbar">
     <div class="toolbar-inner">
 
-      <!-- PRICE DROPDOWN -->
-      <div class="tool-pill dropdown" id="dd-price" data-value="none" aria-label="Price sorting">
-        <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">
+      <div class="tool-pill dropdown" id="dd-price" data-value="none">
+        <button type="button" class="dd-btn">
           <span class="pill-value" id="price-value">Default</span>
           <span class="pill-label">Price</span>
         </button>
 
-        <div class="dd-menu" role="listbox" aria-label="Price options">
-          <button type="button" class="dd-item" role="option" data-value="none">Default</button>
-          <button type="button" class="dd-item" role="option" data-value="asc">Low → High</button>
-          <button type="button" class="dd-item" role="option" data-value="desc">High → Low</button>
+        <div class="dd-menu">
+          <button type="button" class="dd-item" data-value="none">Default</button>
+          <button type="button" class="dd-item" data-value="asc">Low → High</button>
+          <button type="button" class="dd-item" data-value="desc">High → Low</button>
         </div>
       </div>
 
-      <!-- SKIN DROPDOWN -->
-      <div class="tool-pill dropdown" id="dd-skin" data-value="none" aria-label="Skin sorting">
-        <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false">
+      <div class="tool-pill dropdown" id="dd-skin" data-value="none">
+        <button type="button" class="dd-btn">
           <span class="pill-value" id="skin-value">Default</span>
           <span class="pill-label">Skin</span>
         </button>
 
-        <div class="dd-menu" role="listbox" aria-label="Skin options">
-          <button type="button" class="dd-item" role="option" data-value="none">Default</button>
-          <button type="button" class="dd-item" role="option" data-value="asc">Less → More</button>
-          <button type="button" class="dd-item" role="option" data-value="desc">More → Less</button>
+        <div class="dd-menu">
+          <button type="button" class="dd-item" data-value="none">Default</button>
+          <button type="button" class="dd-item" data-value="asc">Less → More</button>
+          <button type="button" class="dd-item" data-value="desc">More → Less</button>
         </div>
       </div>
 
@@ -61,10 +58,105 @@
 
 <!-- SHOP -->
 <main id="shop-view" class="view">
-  <div class="grid shop-grid" id="shop-grid"></div>
+  <div id="shop-grid"></div>
 </main>
 
-<!-- DETAIL (NEW) -->
+<!-- PLAN SELECTION (NEW) -->
+<main id="plan-view" class="view">
+  <div class="plan-wrap">
+
+    <button type="button" class="page-back" id="plan-back">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
+
+    <section class="plan-card">
+      <div class="plan-head">
+        <div class="plan-icon">
+          <img id="plan-product-img" src="" alt="Product image">
+        </div>
+
+        <div class="plan-title-wrap">
+          <div class="plan-title" id="plan-product-title">Product</div>
+          <div class="plan-sub" id="plan-product-sub">Choose your plan</div>
+        </div>
+      </div>
+
+      <!-- JS will render plan groups here -->
+      <div class="plan-groups" id="plan-groups" aria-label="Plans list"></div>
+    </section>
+
+    <!-- cart quick preview -->
+    <section class="cart-mini" id="cart-mini" aria-label="Cart preview">
+      <div class="cart-mini-row">
+        <div class="cart-mini-title">Cart</div>
+        <div class="cart-mini-count" id="cart-mini-count">0 items</div>
+      </div>
+      <button class="primary-btn" id="go-cart-btn" type="button">Go to Cart</button>
+    </section>
+
+  </div>
+</main>
+
+<!-- CART (NEW) -->
+<main id="cart-view" class="view">
+  <div class="cart-wrap">
+
+    <button type="button" class="page-back" id="cart-back">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
+
+    <section class="cart-card">
+      <div class="cart-head">
+        <div class="cart-title">Your Cart</div>
+        <div class="cart-sub" id="cart-sub">Review items</div>
+      </div>
+
+      <!-- JS will render cart items here -->
+      <div class="cart-items" id="cart-items"></div>
+
+      <div class="cart-total">
+        <div class="cart-total-label">Total</div>
+        <div class="cart-total-value" id="cart-total">Ks 0</div>
+      </div>
+
+      <button class="primary-btn" id="cart-checkout" type="button">Checkout</button>
+    </section>
+
+  </div>
+</main>
+
+<!-- TELEGRAM CHECKOUT PAGE (NEW) -->
+<main id="checkout-view" class="view">
+  <div class="checkout-wrap">
+
+    <button type="button" class="page-back" id="checkout-back">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
+
+    <section class="checkout-card">
+      <div class="checkout-title">Checkout</div>
+      <div class="checkout-sub">Send your order on Telegram</div>
+
+      <!-- JS can render summary here -->
+      <div class="checkout-summary" id="checkout-summary"></div>
+
+      <!-- Telegram button -->
+      <a href="#" class="contact-btn" id="checkout-telegram" aria-label="Order on Telegram">
+        <img class="contact-icon" src="https://ik.imagekit.io/dkdlgynlu/1280px-Telegram_2019_Logo.svg.png?updatedAt=1770982479969" alt="Telegram">
+        <div class="contact-text">
+          <div class="contact-title">Order on Telegram</div>
+          <div class="contact-sub">Checkout</div>
+        </div>
+      </a>
+    </section>
+
+  </div>
+</main>
+
+<!-- DETAIL -->
 <main id="detail-view" class="view">
   <div class="detail-wrap">
 
@@ -74,14 +166,11 @@
         <span>Back</span>
       </button>
 
-      <!-- Main image (16:9) -->
       <div class="detail-hero" id="detail-hero" role="button" tabindex="0" aria-label="Open image preview">
         <img id="detail-hero-img" src="" alt="Product image">
       </div>
 
       <h3 class="detail-section-title">Account Gallery</h3>
-
-      <!-- Gallery (6 placeholders for now) -->
       <div class="detail-gallery" id="detail-gallery"></div>
     </div>
 
@@ -98,7 +187,6 @@
           <div class="detail-value detail-status" id="detail-status">Available</div>
         </div>
 
-        <!-- Telegram order button (NEW) -->
         <a href="#" class="contact-btn" id="telegram-order" aria-label="Order on Telegram">
           <img class="contact-icon" src="https://ik.imagekit.io/dkdlgynlu/1280px-Telegram_2019_Logo.svg.png?updatedAt=1770982479969" alt="Telegram">
           <div class="contact-text">
@@ -113,11 +201,11 @@
   </div>
 </main>
 
-<!-- LIGHTBOX (NEW) -->
-<div class="lightbox" id="lightbox" aria-hidden="true">
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
   <div class="lightbox-backdrop" id="lightbox-backdrop"></div>
 
-  <div class="lightbox-shell" role="dialog" aria-modal="true" aria-label="Image preview">
+  <div class="lightbox-shell">
     <button class="lightbox-close" id="lightbox-close" type="button" aria-label="Close preview">&times;</button>
 
     <button class="lightbox-nav lightbox-prev" id="lightbox-prev" type="button" aria-label="Previous image">
@@ -132,18 +220,37 @@
       <i class="fa-solid fa-chevron-right"></i>
     </button>
 
-    <div class="lightbox-thumbs" id="lightbox-thumbs" aria-label="Thumbnail strip"></div>
+    <div class="lightbox-thumbs" id="lightbox-thumbs" aria-label="Preview thumbnails"></div>
   </div>
 </div>
 
+  <section id="cart-bar" class="cart-bar" aria-hidden="true">
+    <button id="cart-toggle" class="cart-toggle" type="button" aria-label="Expand cart">
+      ▲
+    </button>
+
+    <div class="cart-summary">
+      <div class="cart-summary-top">
+        <span id="cart-total-text" class="cart-total">Total: 0Ks</span>
+        <span id="cart-count-text" class="cart-count">0 item(s)</span>
+      </div>
+      <div id="cart-mini-list" class="cart-mini-list"></div>
+    </div>
+
+    <div class="cart-actions">
+      <button id="cart-clear" class="cart-clear" type="button">Clear</button>
+      <button id="cartbar-checkout" class="cart-checkout" type="button">Checkout</button>
+    </div>
+  </section>
+
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button id="nav-home" class="bottom-btn active">
+  <button id="nav-home" class="bottom-btn active" type="button" aria-label="Home">
     <i class="fa-solid fa-house"></i>
     <span>Home</span>
   </button>
 
-  <button id="nav-shop" class="bottom-btn">
+  <button id="nav-shop" class="bottom-btn" type="button" aria-label="Shop">
     <i class="fa-solid fa-store"></i>
     <span>Shop</span>
   </button>
