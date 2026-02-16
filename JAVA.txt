@@ -1149,6 +1149,7 @@ function openDetailForProduct(product){
   });
 }
 
+
 /* Back from detail -> home */
 detailBackBtn?.addEventListener("click", ()=>{
   showView(homeView, { resetScroll:true });
@@ -1156,3 +1157,4 @@ detailBackBtn?.addEventListener("click", ()=>{
 });
 
 })();
+
