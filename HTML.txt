@@ -92,7 +92,7 @@
         <div class="cart-mini-title">Cart</div>
         <div class="cart-mini-count" id="cart-mini-count">0 items</div>
       </div>
-      <button class="primary-btn" id="go-cart-btn" type="button">Go to Cart</button>
+      <button class="primary-btn" id="go-cart-btn" type="button">Add to Cart</button>
     </section>
 
   </div>
@@ -259,3 +259,4 @@
 <script src="script.js"></script>
 </body>
 </html>
+
