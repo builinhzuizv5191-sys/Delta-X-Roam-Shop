@@ -246,12 +246,19 @@ body{
   display:block;
 }
 .card p{
-  margin:0;
-  padding:10px 8px;
-  background: rgba(0,0,0,0.45);
-  border-top: 1px solid rgba(255,255,255,0.12);
   font-size: 13px;
-  font-weight: 900;
+  line-height: 1.2;
+  margin-top: 8px;
+
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;   /* MAX 2 LINES */
+  overflow: hidden;
+}
+@media (max-width: 360px){
+  .card p{
+    font-size: 12px;
+  }
 }
 
 /* =========================================================
@@ -395,6 +402,26 @@ body{
 .plan-name{
   font-weight:900;
 }
+/* Make Mobile Legends Diamond icons match PUBG UC exactly */
+.plan-name.has-icon{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.plan-mini-icon{
+  width:28px;
+  height:28px;
+  border-radius:8px;
+  object-fit:cover;
+  flex:0 0 auto;
+}
+
+.plan-name-text{
+  display:inline-block;
+  line-height:1.1;
+}
+
 .plan-price{
   font-weight:900;
   opacity:.75;
