@@ -296,6 +296,36 @@ const PRODUCTS = [
       { id: "1000", label: "1000⭐", priceKs: 77500 },
     ]
   },
+   
+    {
+    id: "game_diamonds",
+    category: "GAME ITEMS",
+    name: "Mobile Legends Diamond",
+    plans: [
+      /* Diamond Price List (NO "dia" text, format A) */
+      { id: "d_86",   label: "86 Diamonds",   priceKs: 4950 },
+      { id: "d_172",  label: "172 Diamonds",  priceKs: 10100 },
+      { id: "d_257",  label: "257 Diamonds",  priceKs: 19250 },
+      { id: "d_343",  label: "343 Diamonds",  priceKs: 23000 },
+      { id: "d_429",  label: "429 Diamonds",  priceKs: 28750 },
+      { id: "d_514",  label: "514 Diamonds",  priceKs: 38500 },
+      { id: "d_600",  label: "600 Diamonds",  priceKs: 42550 },
+      { id: "d_706",  label: "706 Diamonds",  priceKs: 49000 },
+      { id: "d_1050", label: "1050 Diamonds", priceKs: 65000 },
+      { id: "d_2195", label: "2195 Diamonds", priceKs: 100000 },
+      { id: "d_3688", label: "3688 Diamonds", priceKs: 100000 },
+      { id: "d_5532", label: "5532 Diamonds", priceKs: 100000 },
+      { id: "d_9288", label: "9288 Diamonds", priceKs: 100000 },
+
+      /* Weekly Pass */
+      { id: "weekly_pass", label: "Weekly Pass", priceKs: 6350 },
+      /* Double Diamond */
+      { id: "dd_50_50",   label: "50+50 Diamonds",   priceKs: 3400 },
+      { id: "dd_150_150", label: "150+150 Diamonds", priceKs: 10100 },
+      { id: "dd_250_250", label: "250+250 Diamonds", priceKs: 19900 },
+      { id: "dd_500_500", label: "500+500 Diamonds", priceKs: 37700 }
+    ]
+  },
 
   {
     id: "pubg_uc",
@@ -353,9 +383,16 @@ const PRODUCT_IMAGES = {
   "youtube_premium": "https://ik.imagekit.io/dkdlgynlu/New-Project-52-2-DCD6-D5.png?updatedAt=1764609025093",
 
   "telegram_star": "https://ik.imagekit.io/dkdlgynlu/Wattpad%20_AEF396E_.png?updatedAt=1767023159283",
-  "pubg_uc": "https://ik.imagekit.io/dkdlgynlu/ICON%20_8CC0267_.png?updatedAt=1771148832849"
+  "game_diamonds": "https://ik.imagekit.io/dkdlgynlu/ICON%20_0C2FB3B_.png?updatedAt=1771313541831",
+  "pubg_uc": "https://ik.imagekit.io/dkdlgynlu/ICON%20_3650FA6_.png?updatedAt=1771313541729"
 };
-  
+   /* PUBG UC mini icon should stay as the OLD image (separate from main product image) */
+const PUBG_UC_MINI_ICON = "https://ik.imagekit.io/dkdlgynlu/ICON%20_8CC0267_.png?updatedAt=1771148832849";
+   /* Mini icons for the NEW Game Items product */
+const DIAMOND_MINI_ICON = "https://ik.imagekit.io/dkdlgynlu/ICON%20_4EB6661_.png?updatedAt=1771315082709";
+const WEEKLY_PASS_MINI_ICON = "https://ik.imagekit.io/dkdlgynlu/ICON%20_018686A_.png?updatedAt=1771315082719";
+
+
 /* =========================================================
    VIEWS
    ========================================================= */
@@ -591,6 +628,7 @@ function renderShop(){
     }
     // Game Items group
     if (p.id === "pubg_uc") return "Game Items";
+    if (p.category === "GAME ITEMS") return "Game Items";
 
     // Keep the rest by their existing category names
     if (p.category === "EDITING APPS") return "Editing Apps";
@@ -603,7 +641,7 @@ function renderShop(){
   }
 
   // Fixed order (your confirmed order)
-  const ORDER = ["Telegram", "VPN", "Editing Apps", "AI Tools", "Work", "Streaming", "Game Items"];
+  const ORDER = ["Game Items", "Telegram", "VPN", "Editing Apps", "AI Tools", "Work", "Streaming"];
 
   // Group products
   const groups = new Map();
@@ -612,12 +650,36 @@ function renderShop(){
     if (!groups.has(cat)) groups.set(cat, []);
     groups.get(cat).push(p);
   });
+  // ✅ Custom order inside categories (by product id)
+const PRODUCT_ORDER = {
+  "Game Items": ["pubg_uc"],
+  "Telegram": ["telegram_premium", "telegram_account", "telegram_star"],
+  "VPN": ["outline_vpn", "express_vpn", "jumpjump_vpn", "nord_vpn", "surfshark_vpn", "hma_vpn"],
+  "Editing Apps": ["alight_motion", "canva", "capcut_pro", "inshot", "meitu", "photoroom", "picsart", "vsco", "wink"],
+  "AI Tools": ["gemini_veo3"],
+  "Work": ["zoom_pro", "microsoft_365", "windows"],
+  "Streaming": ["hbo_max", "netflix", "spotify", "youtube_premium"]
+};
 
-  // Sort products inside each category by name (clean + predictable)
-  for (const [cat, arr] of groups.entries()){
-    arr.sort((a,b)=> a.name.localeCompare(b.name));
-  }
+// Sort products inside each category using PRODUCT_ORDER, fallback to name
+for (const [cat, arr] of groups.entries()){
+  const orderList = PRODUCT_ORDER[cat] || [];
+  arr.sort((a,b)=>{
+    const ai = orderList.indexOf(a.id);
+    const bi = orderList.indexOf(b.id);
 
+    // both in list -> use list order
+    if (ai !== -1 && bi !== -1) return ai - bi;
+
+    // one in list -> that one first
+    if (ai !== -1) return -1;
+    if (bi !== -1) return 1;
+
+    // fallback alphabetical
+    return a.name.localeCompare(b.name);
+  });
+}
+   
   // Build HTML sections
   const sectionsHTML = ORDER
     .filter(cat => groups.has(cat))
@@ -845,10 +907,42 @@ function openPlanForProduct(product){
   renderPlanGroups(product);
   updateCartMini();
 }
-
 function groupPlans(product){
-  // Group by first word: Share/Private/etc if present, otherwise put under "Plans"
-  // Example: "Share 1Month" -> group "Share"
+  // ✅ Custom grouping ONLY for Mobile Legends Diamond
+  if (product && product.id === "game_diamonds"){
+    const weekly = [];
+    const double = [];
+    const normal = [];
+
+    product.plans.forEach(pl=>{
+      const label = String(pl.label || "");
+
+      // Group rules:
+      // 1) Weekly Pass
+      if (pl.id === "weekly_pass" || label.toLowerCase().includes("weekly pass")){
+        weekly.push({ ...pl, displayLabel: pl.label });
+        return;
+      }
+
+      // 2) Double Diamond (by id prefix dd_)
+      if (String(pl.id || "").startsWith("dd_")){
+        double.push({ ...pl, displayLabel: pl.label });
+        return;
+      }
+
+      // 3) Everything else -> Normal Plan
+      normal.push({ ...pl, displayLabel: pl.label });
+    });
+
+    const out = [];
+    if (weekly.length) out.push({ name: "Weekly Pass", plans: weekly });
+    if (double.length) out.push({ name: "Double Diamond", plans: double });
+    if (normal.length) out.push({ name: "Normal Plan", plans: normal });
+
+    return out;
+  }
+
+  // ✅ Default behavior for all other products (keep your current system)
   const groups = new Map();
 
   product.plans.forEach(pl=>{
@@ -884,9 +978,18 @@ function renderPlanGroups(product){
           return `
             <div class="plan-row" data-plan-id="${escapeHTML(pl.id)}">
               <div class="plan-left">
-                <div class="plan-name">${escapeHTML(pl.displayLabel)}</div>
-                <div class="plan-price">${escapeHTML(fmtKs(pl.priceKs))}</div>
+                <div class="plan-name ${(product.id === "pubg_uc" || product.id === "game_diamonds") ? "has-icon" : ""}">
+                  ${product.id === "pubg_uc"
+                    ? `<img class="plan-mini-icon" src="${escapeHTML(PUBG_UC_MINI_ICON)}" alt="UC">`
+                    : (product.id === "game_diamonds"
+                    ? `<img class="plan-mini-icon" src="${escapeHTML(pl.id === "weekly_pass" ? WEEKLY_PASS_MINI_ICON : DIAMOND_MINI_ICON)}" alt="Icon">`
+                    : ""
+                   )
+                  }
+                  <span class="plan-name-text">${escapeHTML(pl.displayLabel)}</span>
               </div>
+              <div class="plan-price">${escapeHTML(fmtKs(pl.priceKs))}</div>
+            </div>
 
               <div class="qty-controls">
                 <button class="qty-btn" type="button" data-act="minus" aria-label="Remove 1">−</button>
