@@ -1171,4 +1171,14 @@ body.lb-open .bottom-nav{
     padding: 0 10px;            /* keep aligned */
   }
 }
+/* Remove blue tap highlight everywhere */
+*{
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+a,
+div{
+  -webkit-tap-highlight-color: transparent;
+}
 
