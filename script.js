@@ -318,7 +318,7 @@ const PRODUCTS = [
       { id: "d_9288", label: "9288 Diamonds", priceKs: 100000 },
 
       /* Weekly Pass */
-      { id: "weekly_pass", label: "Weekly Pass", priceKs: 6350 },
+      { id: "weekly_pass", label: "Weekly Pass", priceKs: 5950 },
       /* Double Diamond */
       { id: "dd_50_50",   label: "50+50 Diamonds",   priceKs: 3400 },
       { id: "dd_150_150", label: "150+150 Diamonds", priceKs: 10100 },
