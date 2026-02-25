@@ -303,27 +303,27 @@ const PRODUCTS = [
     name: "Mobile Legends Diamond",
     plans: [
       /* Diamond Price List (NO "dia" text, format A) */
-      { id: "d_86",   label: "86 Diamonds",   priceKs: 4950 },
-      { id: "d_172",  label: "172 Diamonds",  priceKs: 10100 },
-      { id: "d_257",  label: "257 Diamonds",  priceKs: 19250 },
-      { id: "d_343",  label: "343 Diamonds",  priceKs: 23000 },
-      { id: "d_429",  label: "429 Diamonds",  priceKs: 28750 },
-      { id: "d_514",  label: "514 Diamonds",  priceKs: 38500 },
-      { id: "d_600",  label: "600 Diamonds",  priceKs: 42550 },
-      { id: "d_706",  label: "706 Diamonds",  priceKs: 49000 },
-      { id: "d_1050", label: "1050 Diamonds", priceKs: 65000 },
-      { id: "d_2195", label: "2195 Diamonds", priceKs: 100000 },
-      { id: "d_3688", label: "3688 Diamonds", priceKs: 100000 },
-      { id: "d_5532", label: "5532 Diamonds", priceKs: 100000 },
-      { id: "d_9288", label: "9288 Diamonds", priceKs: 100000 },
+      { id: "d_86",   label: "86 Diamonds",   priceKs: 5300 },
+      { id: "d_172",  label: "172 Diamonds",  priceKs: 10600 },
+      { id: "d_257",  label: "257 Diamonds",  priceKs: 15900 },
+      { id: "d_343",  label: "343 Diamonds",  priceKs: 21200 },
+      { id: "d_429",  label: "429 Diamonds",  priceKs: 26550 },
+      { id: "d_514",  label: "514 Diamonds",  priceKs: 31800 },
+      { id: "d_600",  label: "600 Diamonds",  priceKs: 37150 },
+      { id: "d_706",  label: "706 Diamonds",  priceKs: 42400 },
+      { id: "d_1050", label: "1050 Diamonds", priceKs: 63600 },
+      { id: "d_2195", label: "2195 Diamonds", priceKs: 127300 },
+      { id: "d_3688", label: "3688 Diamonds", priceKs: 212000 },
+      { id: "d_5532", label: "5532 Diamonds", priceKs: 318000 },
+      { id: "d_9288", label: "9288 Diamonds", priceKs: 530000 },
 
       /* Weekly Pass */
-      { id: "weekly_pass", label: "Weekly Pass", priceKs: 5950 },
+      { id: "weekly_pass", label: "Weekly Pass", priceKs: 6000 },
       /* Double Diamond */
-      { id: "dd_50_50",   label: "50+50 Diamonds",   priceKs: 3400 },
-      { id: "dd_150_150", label: "150+150 Diamonds", priceKs: 10100 },
-      { id: "dd_250_250", label: "250+250 Diamonds", priceKs: 19900 },
-      { id: "dd_500_500", label: "500+500 Diamonds", priceKs: 37700 }
+      { id: "dd_50_50",   label: "50+50 Diamonds",   priceKs: 3500 },
+      { id: "dd_150_150", label: "150+150 Diamonds", priceKs: 10000 },
+      { id: "dd_250_250", label: "250+250 Diamonds", priceKs: 16000 },
+      { id: "dd_500_500", label: "500+500 Diamonds", priceKs: 32000 }
     ]
   },
 
@@ -332,10 +332,10 @@ const PRODUCTS = [
     category: "PUBG UC",
     name: "PUBG UC",
     plans: [
-      { id: "60",    label: "60UC",    priceKs: 3850 },
-      { id: "325",   label: "325UC",   priceKs: 19650 },
-      { id: "660",   label: "660UC",   priceKs: 40230 },
-      { id: "1800",  label: "1800UC",  priceKs: 99540 },
+      { id: "60",    label: "60UC",    priceKs: 4500 },
+      { id: "325",   label: "325UC",   priceKs: 21050 },
+      { id: "660",   label: "660UC",   priceKs: 41230 },
+      { id: "1800",  label: "1800UC",  priceKs: 100000 },
       { id: "3850",  label: "3850UC",  priceKs: 197610 },
       { id: "8100",  label: "8100UC",  priceKs: 398020 },
       { id: "16200", label: "16200UC", priceKs: 777670 },
