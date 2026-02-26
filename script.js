@@ -41,15 +41,49 @@ function scrollToTopInstant(){
 }
 
 /* =========================================================
-   HOME DATA (your existing test products)
+   HOME ACCOUNT PRODUCTS (NEW SYSTEM)
+   Each product is identified by CODE
    ========================================================= */
 const homeProductsBase = [
-  { id: 1, name: "Product 1", priceValue: 150000, skinValue: 20,  priceText: "Price : 150,000Ks", skinText: "Skin : 20"  },
-  { id: 2, name: "Product 2", priceValue: 80000,  skinValue: 5,   priceText: "Price : 80,000Ks",  skinText: "Skin : 5"   },
-  { id: 3, name: "Product 3", priceValue: 220000, skinValue: 60,  priceText: "Price : 220,000Ks", skinText: "Skin : 60"  },
-  { id: 4, name: "Product 4", priceValue: 50000,  skinValue: 2,   priceText: "Price : 50,000Ks",  skinText: "Skin : 2"   },
-  { id: 5, name: "Product 5", priceValue: 120000, skinValue: 40,  priceText: "Price : 120,000Ks", skinText: "Skin : 40"  },
-  { id: 6, name: "Product 6", priceValue: 300000, skinValue: 100, priceText: "Price : 300,000Ks", skinText: "Skin : 100" }
+  {
+    id: "ROAM001",
+    code: "ROAM001",
+    name: "ROAM001",
+
+    // ✅ Home main image (cover)
+    cover: "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-03-42-569.jpg",
+
+    // ✅ Detail page gallery (Account Gallery)
+    gallery: [
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-07-15-115.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-04-31-516.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-06-02-159.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-06-29-004.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-05-12-319.jpg"
+    ],
+
+    // ✅ Sorting + display
+    priceValue: 100000,
+    skinValue: 272,
+
+    status: "Available"
+  },
+
+  {
+    id: "ROAM002",
+    code: "ROAM002",
+    cover: "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-11-10-059.jpg",
+    gallery: [
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-11-28-187.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-15-50-549.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-14-55-976.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-16-07-021.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-15-10-459.jpg"
+    ],
+    priceValue: 155000,
+    skinValue: 0,
+    status: "Available"
+  }
 ];
 
 /* =========================================================
@@ -576,21 +610,29 @@ function renderHome(){
   const items = sortHomeProducts(homeProductsBase);
 
   homeBanners.innerHTML = items.map(p => `
-    <div class="banner-card" data-home-id="${p.id}">
-      <div class="banner-media">
-        <img src="${escapeHTML(HOME_IMAGE)}" alt="${escapeHTML(p.name)}">
-        <div class="banner-overlay">
-          <div class="overlay-text">${escapeHTML(p.priceText)}</div>
-          <div class="overlay-text">${escapeHTML(p.skinText)}</div>
-        </div>
-      </div>
-    </div>
-  `).join("");
+  <div class="banner-card" data-home-id="${p.id}">
+    <div class="banner-media">
 
+      <!-- COVER IMAGE -->
+      <img src="${escapeHTML(p.cover)}" alt="Code ${escapeHTML(p.code)}">
+
+      <!-- CODE TAG TOP LEFT -->
+      <div class="code-tag">Code : ${escapeHTML(p.code)}</div>
+
+      <!-- PRICE OVERLAY -->
+      <div class="banner-overlay">
+        <div class="overlay-text">Price : ${fmtKs(p.priceValue)}</div>
+        <div class="overlay-text">Skin : ${escapeHTML(String(p.skinValue))}</div>
+      </div>
+     
+    </div>
+  </div>
+`).join("");
+  
   // click -> detail view (your existing flow)
   homeBanners.querySelectorAll(".banner-card").forEach(card=>{
     card.addEventListener("click", ()=>{
-      const id = Number(card.getAttribute("data-home-id"));
+      const id = card.getAttribute("data-home-id");
       const product = homeProductsBase.find(x => x.id === id);
       if (!product) return;
       openDetailForProduct(product);
@@ -1199,6 +1241,7 @@ const detailBackBtn = document.getElementById("detail-back");
 const detailHero    = document.getElementById("detail-hero");
 const detailHeroImg = document.getElementById("detail-hero-img");
 const detailGallery = document.getElementById("detail-gallery");
+const detailCode    = document.getElementById("detail-code");
 const detailPrice   = document.getElementById("detail-price");
 const detailStatus  = document.getElementById("detail-status");
 const telegramOrder = document.getElementById("telegram-order");
@@ -1288,12 +1331,13 @@ document.addEventListener("keydown", (e)=>{
   if (e.key === "ArrowRight") nextImage();
 });
 
-/* Populate detail view for clicked home product */
 function openDetailForProduct(product){
-  if (detailHeroImg) detailHeroImg.src = HOME_IMAGE;
+  // ✅ Hero image should use product cover (fallback to HOME_IMAGE)
+  const heroSrc = product?.cover || HOME_IMAGE;
+  if (detailHeroImg) detailHeroImg.src = heroSrc;
 
-  // gallery placeholders (6)
-  const galleryImages = Array.from({length:6},()=>HOME_IMAGE);
+  // ✅ Account Gallery should use product.gallery (fallback to empty)
+  const galleryImages = Array.isArray(product?.gallery) ? product.gallery.slice() : [];
 
   if (detailGallery){
     detailGallery.innerHTML = galleryImages.map((src,i)=>`
@@ -1314,22 +1358,37 @@ function openDetailForProduct(product){
     });
   }
 
-  // Right info
-  if (detailPrice) detailPrice.textContent = (product.priceText || "MMK 0");
-  if (detailStatus) detailStatus.textContent = "Available";
+if (detailCode){
+  detailCode.textContent = product?.code || product?.id || "—";
+}
 
-  // Telegram order button in detail (kept as your placeholder behavior)
-  telegramOrder?.addEventListener("click", (e)=>{
+// ✅ Price should use priceValue if present (fallback to existing product.priceText)
+if (detailPrice){
+  if (Number.isFinite(product?.priceValue)) detailPrice.textContent = fmtKs(product.priceValue);
+  else detailPrice.textContent = (product?.priceText || "MMK 0");
+}
+
+// ✅ Status (use product.status if provided)
+if (detailStatus) detailStatus.textContent = product?.status || "Available";
+
+  // Telegram order button (leave your current placeholder behavior)
+  telegramOrder && (telegramOrder.onclick = (e)=>{
     e.preventDefault();
     alert("Set your Telegram order link in script.js for #telegram-order.");
   });
 
-  // Hero preview
-  detailHero?.addEventListener("click", ()=>{
-    openLightbox([HOME_IMAGE, ...galleryImages], 0);
+  // ✅ Hero preview should open lightbox using hero + gallery
+  const heroLightboxList = [heroSrc, ...galleryImages].filter((v, idx, arr) => arr.indexOf(v) === idx);
+
+  detailHero && (detailHero.onclick = ()=>{
+    if (heroLightboxList.length) openLightbox(heroLightboxList, 0);
   });
-  detailHero?.addEventListener("keydown", (e)=>{
-    if (e.key==="Enter" || e.key===" ") { e.preventDefault(); openLightbox([HOME_IMAGE, ...galleryImages], 0); }
+
+  detailHero && (detailHero.onkeydown = (e)=>{
+    if (e.key==="Enter" || e.key===" ") {
+      e.preventDefault();
+      if (heroLightboxList.length) openLightbox(heroLightboxList, 0);
+    }
   });
 }
 
