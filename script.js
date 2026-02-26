@@ -1218,6 +1218,18 @@ function buildTelegramMessage(){
   lines.push(`Total: ${fmtKs(cartTotalKs())}`);
   return lines.join("\n");
 }
+function buildHomeOrderMessage(product){
+  const code = product?.code || product?.id || "Unknown";
+  const price = Number.isFinite(product?.priceValue) ? fmtKs(product.priceValue) : "0Ks";
+  const skin = Number.isFinite(product?.skinValue) ? String(product.skinValue) : "0";
+
+  return [
+    "Order:",
+    `Code: ${code}`,
+    `Price: ${price}`,
+    `Skin: ${skin}`
+  ].join("\n");
+}
 
 function renderCheckout(){
   // Show summary text on the checkout page
@@ -1372,11 +1384,12 @@ if (detailPrice){
 if (detailStatus) detailStatus.textContent = product?.status || "Available";
 
   // Telegram order button (leave your current placeholder behavior)
-  telegramOrder && (telegramOrder.onclick = (e)=>{
-    e.preventDefault();
-    alert("Set your Telegram order link in script.js for #telegram-order.");
-  });
-
+  if (telegramOrder){
+  const msg = buildHomeOrderMessage(product);
+  const url = TELEGRAM_ORDER_URL + "?text=" + encodeURIComponent(msg);
+  telegramOrder.setAttribute("href", url);
+}
+  
   // ✅ Hero preview should open lightbox using hero + gallery
   const heroLightboxList = [heroSrc, ...galleryImages].filter((v, idx, arr) => arr.indexOf(v) === idx);
 
