@@ -81,7 +81,22 @@ const homeProductsBase = [
       "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-15-10-459.jpg"
     ],
     priceValue: 155000,
-    skinValue: 0,
+    skinValue: 120,
+    status: "Available"
+  },
+  {
+    id: "ROAM003",
+    code: "ROAM003",
+    cover: "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-11-10-059.jpg",
+    gallery: [
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-11-28-187.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-15-50-549.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-14-55-976.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-16-07-021.jpg",
+      "https://ik.imagekit.io/dkdlgynlu/Picsart_26-02-25_19-15-10-459.jpg"
+    ],
+    priceValue: 155000,
+    skinValue: 300,
     status: "Available"
   }
 ];
